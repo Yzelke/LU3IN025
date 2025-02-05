@@ -46,4 +46,3 @@ plt.plot(l,time_moyE)
 plt.plot(l,time_moyP)
 plt.show()
 
-#fghj
