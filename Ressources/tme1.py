@@ -234,3 +234,81 @@ def matrice_CP(n) :
         matrice.append(random.sample(range(0,n),n))
         
     return matrice
+
+def algoGS_parcours2(prefEtu, prefSpe, cap):
+
+    spe_libre = [i for i in range(len(prefSpe)) if cap[i] > 0]  # Only add spe with available capacity
+    heapq.heapify(spe_libre)
+    
+    affectation = [None] * len(prefEtu)  # Initialize student assignments
+
+    while spe_libre:
+        spe = heapq.heappop(spe_libre)
+        pref_de_spe = deque(prefSpe[spe])  # Create a queue from the preference list of the current specialization
+
+        if pref_de_spe:
+            etu = pref_de_spe.popleft()  # Pop the first student from the specialization's preference list
+
+            if affectation[etu] is None:  # If the student is not assigned to any specialization
+                affectation[etu] = spe
+                cap[spe] -= 1  # Decrease the capacity of the specialization
+
+                if cap[spe] > 0:  # If capacity is not exhausted, push back to heap
+                    heapq.heappush(spe_libre, spe)
+
+            else:  # If the student is already assigned
+                pref_de_etu = prefEtu[etu]  # Get the student's preferences
+                spe_curr = affectation[etu]  # Get the student's current specialization
+
+                id_spe = pref_de_etu.index(spe)
+                id_spe_curr = pref_de_etu.index(spe_curr)
+
+                if id_spe < id_spe_curr:  # If the student prefers the new specialization more
+                    affectation[etu] = spe
+                    cap[spe_curr] += 1  # Free up the current specialization's slot
+                    cap[spe] -= 1  # Decrease the capacity of the new specialization
+
+                    if cap[spe_curr] > 0:  # If the old specialization still has space, push it back to the heap
+                        heapq.heappush(spe_libre, spe_curr)
+
+                    if cap[spe] > 0:  # If the new specialization still has space, push it back to the heap
+                        heapq.heappush(spe_libre, spe)
+
+    return affectation
+
+def algoGS3(prefEtu, prefSpe, cap):
+    #Tas pour les etudiants libres
+    etu_libre = list(range(len(prefEtu)))
+    heapq.heapify(etu_libre)
+    #Dequifier les matrices
+    preferenceEtu = [deque(prefs) for prefs in prefEtu]
+    #liste de dictionnaires pour les préférences
+    prefEtuIndices = [{etu: idx for idx, etu in enumerate(prefs)} for prefs in prefSpe]
+    #liste de tas pour les affectations
+    affectation = [[] for i in range(9)]
+
+    while(etu_libre):
+        etu_actuel = heapq.heappop(etu_libre)
+        list_pref_de_etu = preferenceEtu[etu_actuel]
+
+        if(list_pref_de_etu):
+            spe = list_pref_de_etu.popleft() # on récupere la spé préférée dans la liste
+            if cap[spe] > 0:
+                cap[spe]-=1
+                heapq.heappush(affectation[spe], etu_actuel)
+            
+            else:
+                #tas min, le pire doit etre a l'indice 0
+                the_worst = affectation[spe][0]
+                if prefEtuIndices[spe][etu_actuel] < prefEtuIndices[spe][the_worst]:
+                    affectation[spe].remove(the_worst)
+                    heapq.heappush(affectation[spe], etu_actuel)
+
+                    # Remettre l'étudiant rejeté dans la liste des libres
+                    heapq.heappush(etu_libre, the_worst)
+                else:
+                    # Remettre l'étudiant actuel dans la liste des libres
+                    heapq.heappush(etu_libre, etu_actuel)
+
+    #print(affectation)
+    return affectation
