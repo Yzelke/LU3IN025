@@ -74,13 +74,6 @@ def capacite(s):
     #print(cap)
     return cap
 
-def pire_etudiant(spe, affectation, pref_spe):
-    for etu in pref_spe:
-        if affectation[etu] == spe:
-            return etu
-    return None
-
-
 def algoGS(prefEtu1, prefSpe1, cap1):
     prefEtu = copy.copy(prefEtu1)  
     prefSpe = copy.copy(prefSpe1)
@@ -93,8 +86,10 @@ def algoGS(prefEtu1, prefSpe1, cap1):
     affectation = [None] * len(prefEtu)
     
     prefEtuIndices = [{etu: idx for idx, etu in enumerate(prefs)} for prefs in prefSpe]#liste de dictionnaires pour les préférences
+    prefSpeIndices = [{etu: idx for idx, etu in enumerate(prefs)} for prefs in prefSpe]
     #tant qu'il y a un etudiant libre dans le tas
     while etu_libre:
+        #print(affectation)
         etu_actuel = heapq.heappop(etu_libre)#on prend le premier
         list_pref_de_etu = deque(prefEtu[etu_actuel])#on recupere sa liste de preference
 
@@ -105,24 +100,32 @@ def algoGS(prefEtu1, prefSpe1, cap1):
                 affectation[etu_actuel] = spe #on affecte directement
                 cap[spe] -= 1 #et on decremente de 1
             else:#sinon
-                #on recupere la liste de preference de la spe
-                list_pref_de_spe = prefSpe[spe]
                 #on recupere le pire etudiant affecte a la spe
-                last_etu = pire_etudiant(spe, affectation, list_pref_de_spe)
+                #last_etu = pire_etudiant1(spe, affectation, list_pref_de_spe)
+                last_etu = pire_etudiant1(spe, affectation, prefSpeIndices[spe])
+                if last_etu is not None:
+                    id_etu_actuel = prefEtuIndices[spe][etu_actuel]
+                    id_last_etu = prefEtuIndices[spe][last_etu]
 
-                id_etu_actuel = prefEtuIndices[spe][etu_actuel]#on recupere les indices de preferences
-                id_last_etu = prefEtuIndices[spe][last_etu]
-
-                if id_etu_actuel < id_last_etu:  # si l'etudiant actuel est préféré à l'ancien
-                    affectation[last_etu] = None
-                    affectation[etu_actuel] = spe
-                    heapq.heappush(etu_libre, last_etu)  # Le dernier étudiant est à nouveau libre
-                else:
-                    heapq.heappush(etu_libre, etu_actuel)
-                    prefEtu[etu_actuel] = list(list_pref_de_etu)  # Mise à jour de ses préférences
+                    if id_etu_actuel < id_last_etu:  # Si l'étudiant actuel est préféré à l'ancien
+                        affectation[last_etu] = None
+                        affectation[etu_actuel] = spe
+                        heapq.heappush(etu_libre, last_etu)  # Le dernier étudiant est à nouveau libre
+                    else:
+                        heapq.heappush(etu_libre, etu_actuel)
+                        prefEtu[etu_actuel] = list(list_pref_de_etu)  # Mise à jour de ses préférences
 
     return affectation
 
+def pire_etudiant1(spe, affectation, pref_spe_indices):
+    # Trouve les étudiants affectés à cette spécialité
+    etudiants_affectes = [etu for etu in pref_spe_indices.keys() if affectation[etu] == spe]
+    
+    if not etudiants_affectes:
+        return None
+
+    # Trouve l'étudiant avec le plus mauvais rang
+    return max(etudiants_affectes, key=lambda etu: pref_spe_indices[etu])
 
 #Question 4
 
