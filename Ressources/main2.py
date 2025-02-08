@@ -9,6 +9,13 @@ capacite = tme1.capacite("PrefSpe.txt")
 def cap(n) :
     return [int(n*0.15)] + [int(n*0.1)]*7 + [int(n*0.15)]
 
+def cap2(n):
+    base = n // 9
+    reste = n % 9
+    capacite = [base] * 9
+    for i in range(reste):
+        capacite[i] += 1
+    return capacite
 
 #paire = tme1.paire_instable(dict2, matrice_ce, matrice_cp)
 #print(paire)
@@ -20,7 +27,7 @@ for i in range(200,2001,200):
     SumP =0
     matrice_ce = tme1.matrice_CE(i)
     matrice_cp = tme1.matrice_CP(i)
-    c = cap(i)
+    c = cap2(i)
 
     for j in range(10):
         start = time.perf_counter()
