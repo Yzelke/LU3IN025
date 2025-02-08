@@ -19,7 +19,6 @@ def lectureFichier(s): # Definition d'une fonction, avec un parametre (s). Ne pa
     # l.index(t) renvoie la position de t dans l (s'assurer que t est dans l)
     # for s in l: s vaut successivement chacun des elements de l (pas les indices, les elements)
 
-
 def lecture_matrice(s) : 
     monFichier = open(s, "r") # Ouverture en lecture. Indentation par rapport a la ligne d'avant (<-> bloc).
     contenu = monFichier.readlines() # Contenu contient une liste de chainces de caracteres, chaque chaine correspond a une ligne       
@@ -75,110 +74,97 @@ def capacite(s):
     #print(cap)
     return cap
 
-def pire_etudiant(spe, affectation, list_pref) : #retourne l'étudiant le moins aimé dans la liste d'affectation du parcours
-    # l = liste de preference de le Spe
-    # s = spé
-    # affectation = liste d'affectation 
+def pire_etudiant(spe, affectation, pref_spe):
+    for etu in pref_spe:
+        if affectation[etu] == spe:
+            return etu
+    return None
+
+
+def algoGS(prefEtu1, prefSpe1, cap1):
+    prefEtu = copy.copy(prefEtu1)  
+    prefSpe = copy.copy(prefSpe1)
+    cap = copy.copy(cap1)
+    #tas contenant les etudiants libres
+    etu_libre = [i for i in range(len(prefEtu))]
+    heapq.heapify(etu_libre)  # Tas de priorité pour les étudiants libres
+
+    #initialisation d'affectation
+    affectation = [None] * len(prefEtu)
     
-    etu_affect = (i for i in range(len(affectation)) if affectation[i] == spe)
-    
-    if not etu_affect : #si vide
-        return None
-    
-    return max(etu_affect, key=lambda etu: list_pref.index(etu))
+    prefEtuIndices = [{etu: idx for idx, etu in enumerate(prefs)} for prefs in prefSpe]#liste de dictionnaires pour les préférences
+    #tant qu'il y a un etudiant libre dans le tas
+    while etu_libre:
+        etu_actuel = heapq.heappop(etu_libre)#on prend le premier
+        list_pref_de_etu = deque(prefEtu[etu_actuel])#on recupere sa liste de preference
 
+        if list_pref_de_etu:#tant qu'il y a encore des spe dans la liste
+            spe = list_pref_de_etu.popleft()# on prend la spe en tete
 
-def algoGS(prefEtu, prefSpe, cap):
-    prefEtu = copy.deepcopy(prefEtu)  
-    prefSpe = copy.deepcopy(prefSpe)
-    cap = copy.deepcopy(cap)
-    
-    etu_libre = [ i for i in range(len(prefEtu))]
-    heapq.heapify(etu_libre)
-    affectation = [None for i in range(len(prefEtu))]
+            if cap[spe] > 0:  #si la spe a encore de la place
+                affectation[etu_actuel] = spe #on affecte directement
+                cap[spe] -= 1 #et on decremente de 1
+            else:#sinon
+                #on recupere la liste de preference de la spe
+                list_pref_de_spe = prefSpe[spe]
+                #on recupere le pire etudiant affecte a la spe
+                last_etu = pire_etudiant(spe, affectation, list_pref_de_spe)
 
-    while(etu_libre):
-        etu_actuel = heapq.heappop(etu_libre)
-        list_pref_de_etu = deque(prefEtu[etu_actuel]) #on prend ses preferences
+                id_etu_actuel = prefEtuIndices[spe][etu_actuel]#on recupere les indices de preferences
+                id_last_etu = prefEtuIndices[spe][last_etu]
 
-        if(list_pref_de_etu) : #si la liste n'est pas vide
-            spe = list_pref_de_etu.popleft() # on récupere la spé préférée dans la liste
-
-            if(cap[spe] != 0): #si la capacite n'a pas atteint 0
-                affectation[etu_actuel] = spe
-                cap[spe] -= 1
-
-            else:
-                list_pref_de_spe = deque(prefSpe[spe]) #preference de la spe
-                last_etu = pire_etudiant(spe,affectation,list_pref_de_spe) #etudiant le moins aimé affecter
-                if(last_etu is not None) :
-                    id_etu_actuel = list_pref_de_spe.index(etu_actuel) #indice de l'etudiant actuel
-                    id_last_etu = list_pref_de_spe.index(last_etu) #indice du pire etudiant
-
-                if(id_etu_actuel < id_last_etu): #on compare
+                if id_etu_actuel < id_last_etu:  # si l'etudiant actuel est préféré à l'ancien
                     affectation[last_etu] = None
                     affectation[etu_actuel] = spe
-                    heapq.heappush(etu_libre,last_etu)
-
-                
+                    heapq.heappush(etu_libre, last_etu)  # Le dernier étudiant est à nouveau libre
                 else:
                     heapq.heappush(etu_libre, etu_actuel)
-                    prefEtu[etu_actuel] = list(list_pref_de_etu)
-                
+                    prefEtu[etu_actuel] = list(list_pref_de_etu)  # Mise à jour de ses préférences
+
     return affectation
 
 
 #Question 4
 
-def recupere_cle(dict, valeur) :
+def algoGS_parcours(prefEtu1,prefSpe1,cap1) :
+    prefEtu = copy.copy(prefEtu1)  
+    prefSpe = copy.copy(prefSpe1)
+    cap = copy.copy(cap1)
 
-    for key in dict.keys() :
-        if valeur in dict[key] :  
-            return key
+    spe_libre = list(range(len(prefSpe)))
+    heapq.heapify(spe_libre) #tas pour les étudiants libres
+    preferenceSpe = [deque(prefs) for prefs in prefSpe] #liste de deque des preferences
+    prefSpeIndices = [{spe : idx for idx,spe in enumerate(prefs)} for prefs in prefEtu] #liste de dictionnaire pour les preferences
 
-    print("N'existe pas")
-
-def algoGS_parcours(prefEtu,prefSpe,cap) :
-    prefEtu = copy.deepcopy(prefEtu)  
-    prefSpe = copy.deepcopy(prefSpe)
-    cap = copy.deepcopy(cap)
-    
-    spe_libre = [ i for i in range(len(prefSpe))]
-    heapq.heapify(spe_libre)
     affectation = [None for i in range(len(prefEtu))]
 
-    while(spe_libre):
-        spe = heapq.heappop(spe_libre)
-        pref_de_spe = deque(prefSpe[spe])
+    while(spe_libre) : 
+        spe_actuel = heapq.heappop(spe_libre)
+        pref_de_spe = preferenceSpe[spe_actuel]
 
-        if(pref_de_spe) : #si la liste n'est pas vide
-            etu = pref_de_spe.popleft() #on prend le premier etudiant de la liste des spé pref
-            if affectation[etu] is None : #s'il est libre on l'affecte au parcours
-                affectation[etu] = spe
-                cap[spe] -= 1 #diminue la capacité
+        if(pref_de_spe):
+            etu = pref_de_spe.popleft()
+            if (affectation[etu] is None):
+                cap[spe_actuel] -= 1
+                affectation[etu] = spe_actuel
 
-                if(cap[spe] > 0) : #si la capacité n'est pas atteinte on reajoute la spe dans spe_libre
-                    heapq.heappush(spe_libre, spe)
-                
-            else : #si l'etudiant n'est pas libre on doit comparer
-                pref_de_etu = prefEtu[etu] #on récupère les préférences de l'étudiant
+                if(cap[spe_actuel] > 0) :
+                    heapq.heappush(spe_libre, spe_actuel)
+
+            else :
                 spe_curr = affectation[etu]
-                
-                id_spe = pref_de_etu.index(spe)
-                id_spe_curr = pref_de_etu.index(spe_curr)
 
-                if id_spe < id_spe_curr : #on compare les indices
-                    affectation[etu] = spe
+                if (prefSpeIndices[etu][spe_actuel] < prefSpeIndices[etu][spe_curr]) :
+                    affectation[etu] = spe_actuel
                     cap[spe_curr] += 1
-                    cap[spe] -= 1
-                    
-                    heapq.heappush(spe_libre,spe_curr)
-                    if(cap[spe] > 0) :
-                        heapq.heappush(spe_libre,spe)
-                
+                    cap[spe_actuel] -= 1
+
+                    heapq.heappush(spe_libre, spe_curr)
+                    if (cap[spe_actuel] > 0) :
+                        heapq.heappush(spe_libre,spe_actuel)
+
                 else :
-                    heapq.heappush(spe_libre,spe)
-                    prefSpe[spe] = list(pref_de_spe)
+                    heapq.heappush(spe_libre,spe_actuel)
 
     return affectation
 
@@ -232,94 +218,3 @@ def matrice_CP(n) :
         
     return matrice
 
-def algoGS_parcours2(prefEtu,prefSpe,cap) :
-    prefEtu = copy.deepcopy(prefEtu)  
-    prefSpe = copy.deepcopy(prefSpe)
-    cap = copy.deepcopy(cap)
-
-    spe_libre = list(range(len(prefSpe)))
-    heapq.heapify(spe_libre) #tas pour les étudiants libres
-    preferenceSpe = [deque(prefs) for prefs in prefSpe] #liste de deque des preferences
-    prefSpeIndices = [{spe : idx for idx,spe in enumerate(prefs)} for prefs in prefEtu] #liste de dictionnaire pour les preferences
-
-    affectation = [None for i in range(len(prefEtu))]
-
-    while(spe_libre) : 
-        #print(affectation)
-        spe_actuel = heapq.heappop(spe_libre)
-        pref_de_spe = preferenceSpe[spe_actuel]
-
-        if(pref_de_spe):
-            etu = pref_de_spe.popleft()
-            #print(etu)
-            if (affectation[etu] is None):
-                cap[spe_actuel] -= 1
-                affectation[etu] = spe_actuel
-
-                if(cap[spe_actuel] > 0) :
-                    heapq.heappush(spe_libre, spe_actuel)
-
-            else :
-                #print(affectation[spe_actuel])
-                spe_curr = affectation[etu]
-
-                if (prefSpeIndices[etu][spe_actuel] < prefSpeIndices[etu][spe_curr]) :
-                    affectation[etu] = spe_actuel
-                    cap[spe_curr] += 1
-                    cap[spe_actuel] -= 1
-
-                    heapq.heappush(spe_libre, spe_curr)
-                    if (cap[spe_actuel] > 0) :
-                        heapq.heappush(spe_libre,spe_actuel)
-
-                else :
-                    heapq.heappush(spe_libre,spe_actuel)
-
-    return affectation
-
-def algoGS4(prefEtu, prefSpe, cap):
-    prefEtu = copy.deepcopy(prefEtu)  
-    prefSpe = copy.deepcopy(prefSpe)
-    cap = copy.deepcopy(cap)
-    etu_libre = [i for i in range(len(prefEtu))]
-    heapq.heapify(etu_libre)  # Tas de priorité pour les étudiants libres
-    affectation = [None] * len(prefEtu)
-    
-    # Pré-calculer les positions des étudiants dans les préférences des spécialités
-    # pour accélérer la recherche de l'indice de l'étudiant dans la liste de préférences
-    prefEtuIndices = [{etu: idx for idx, etu in enumerate(prefs)} for prefs in prefSpe]#liste de dictionnaires pour les préférences
-    while etu_libre:
-        etu_actuel = heapq.heappop(etu_libre)  # Etudiant libre à traiter
-        list_pref_de_etu = deque(prefEtu[etu_actuel])  # Liste de ses préférences
-
-        if list_pref_de_etu:
-            spe = list_pref_de_etu.popleft()  # On prend la spé préférée de l'étudiant
-
-            if cap[spe] > 0:  # Si la spécialité a encore des places disponibles
-                affectation[etu_actuel] = spe
-                cap[spe] -= 1
-            else:
-                # Trouver l'étudiant le moins préféré dans la spécialité
-                list_pref_de_spe = prefSpe[spe]
-                last_etu = pire_etudiant1(spe, affectation, list_pref_de_spe)
-
-                if last_etu is not None:
-                    id_etu_actuel = prefEtuIndices[spe][etu_actuel]
-                    id_last_etu = prefEtuIndices[spe][last_etu]
-
-                    if id_etu_actuel < id_last_etu:  # Si l'étudiant actuel est préféré à l'ancien
-                        affectation[last_etu] = None
-                        affectation[etu_actuel] = spe
-                        heapq.heappush(etu_libre, last_etu)  # Le dernier étudiant est à nouveau libre
-                    else:
-                        heapq.heappush(etu_libre, etu_actuel)
-                        prefEtu[etu_actuel] = list(list_pref_de_etu)  # Mise à jour de ses préférences
-
-    return affectation
-
-def pire_etudiant1(spe, affectation, pref_spe):
-    # Recherche de l'étudiant avec le plus faible rang dans les préférences de la spécialité
-    for etu in pref_spe:
-        if affectation[etu] == spe:
-            return etu
-    return None    

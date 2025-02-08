@@ -16,7 +16,6 @@ def cap(n) :
 time_moyE = []
 time_moyP = []
 for i in range(200,2001,200):
-    print(i)
     SumE =0
     SumP =0
     matrice_ce = tme1.matrice_CE(i)
@@ -24,16 +23,15 @@ for i in range(200,2001,200):
     c = cap(i)
 
     for j in range(10):
-        print(j)
-        start = time.time()
+        start = time.perf_counter()
         dict1 = tme1.algoGS(matrice_ce, matrice_cp, c)
-        end = time.time()
+        end = time.perf_counter()
         SumE += (end-start)
         #print("Temps pour algoGS côté étudiant :", end-start)
 
-        start = time.time()
+        start = time.perf_counter()
         dict2 = tme1.algoGS_parcours(matrice_ce, matrice_cp, c)
-        end = time.time()
+        end = time.perf_counter()
         SumP += (end-start)
         #print("Temps pour algoGS côté parcours :", end-start)
 
@@ -41,6 +39,7 @@ for i in range(200,2001,200):
     time_moyP.append(SumP/10)
     
 print(time_moyE)
+print(time_moyP)
 l = [200,400,600,800,1000,1200,1400,1600,1800,2000]
 plt.plot(l,time_moyE)
 plt.plot(l,time_moyP)
