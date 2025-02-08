@@ -9,6 +9,7 @@ capacite = tme1.capacite("PrefSpe.txt")
 def cap(n) :
     return [int(n*0.15)] + [int(n*0.1)]*7 + [int(n*0.15)]
 
+
 def cap2(n):
     base = n // 9
     reste = n % 9
