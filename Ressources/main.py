@@ -33,7 +33,8 @@ for i in range(200,2001,200):
         end = time.perf_counter()
         SumE += (end-start)
         #print("Temps pour algoGS côté étudiant :", end-start)
-
+        
+        #tme1.paire_instable(dict1, matrice_ce, matrice_cp)
         start = time.perf_counter()
         dict2 = tme1.algoGS_parcours(matrice_ce, matrice_cp, c)
         end = time.perf_counter()
