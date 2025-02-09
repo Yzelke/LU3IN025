@@ -126,43 +126,47 @@ def algoGS(prefEtu1, prefSpe1, cap1):
 #Question 4
 
 def algoGS_parcours(prefEtu1,prefSpe1,cap1) :
+    #copie des arguments pour ne pas les modifier
     prefEtu = copy.copy(prefEtu1)  
     prefSpe = copy.copy(prefSpe1)
     cap = copy.copy(cap1)
-
+    
     spe_libre = list(range(len(prefSpe)))
     heapq.heapify(spe_libre) #tas pour les étudiants libres
+
     preferenceSpe = [deque(prefs) for prefs in prefSpe] #liste de deque des preferences
     prefSpeIndices = [{spe : idx for idx,spe in enumerate(prefs)} for prefs in prefEtu] #liste de dictionnaire pour les preferences
 
-    affectation = [None for i in range(len(prefEtu))]
+    affectation = [None] * len(prefEtu)
 
-    while(spe_libre) : 
-        spe_actuel = heapq.heappop(spe_libre)
-        pref_de_spe = preferenceSpe[spe_actuel]
+    while(spe_libre) : #tant qu'il reste des specialites libres
+        spe_actuel = heapq.heappop(spe_libre)# on recupere la spe en tete
+        pref_de_spe = preferenceSpe[spe_actuel]#ainsi que sa liste de preferences
 
-        if(pref_de_spe):
-            etu = pref_de_spe.popleft()
-            if (affectation[etu] is None):
+        if(pref_de_spe):#s'il n'est pas vide
+            etu = pref_de_spe.popleft()#on recupere l'etudiant en tete 
+            if (affectation[etu] is None): #si l'etudiant pas encore affecte
                 cap[spe_actuel] -= 1
+                #on l'affecte directement
                 affectation[etu] = spe_actuel
 
-                if(cap[spe_actuel] > 0) :
+                if(cap[spe_actuel] > 0) :#si apres affectation, spe a encore de la place, on le remet dans spe_libre
                     heapq.heappush(spe_libre, spe_actuel)
-
+            #si l'etudiant est affecte
             else :
-                spe_curr = affectation[etu]
-
+                spe_curr = affectation[etu] # on recupere la spe de l'etudiant
+                #puis on compare leur indice
                 if (prefSpeIndices[etu][spe_actuel] < prefSpeIndices[etu][spe_curr]) :
+                    #l'etudiant change de parcours
                     affectation[etu] = spe_actuel
                     cap[spe_curr] += 1
                     cap[spe_actuel] -= 1
-
-                    heapq.heappush(spe_libre, spe_curr)
-                    if (cap[spe_actuel] > 0) :
+                    
+                    heapq.heappush(spe_libre, spe_curr)#l'ancienne spe devient libre
+                    if (cap[spe_actuel] > 0) :#s'il reste de la place, on remet dans spe_libre
                         heapq.heappush(spe_libre,spe_actuel)
 
-                else :
+                else : # L'etudiant prefere rester dans sa spe actuelle
                     heapq.heappush(spe_libre,spe_actuel)
 
     return affectation
