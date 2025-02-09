@@ -170,10 +170,10 @@ def algoGS_parcours(prefEtu1,prefSpe1,cap1) :
 
 #Question 6
 
-def paire_instable(affect, prefEtu, prefSpe) :
-    prefEtu = copy.deepcopy(prefEtu)  
-    prefSpe = copy.deepcopy(prefSpe)
-    affect = copy.deepcopy(affect)
+def paire_instable(affect1, prefEtu1, prefSpe1) :
+    prefEtu = copy.copy(prefEtu1)  
+    prefSpe = copy.copy(prefSpe1)
+    affect = copy.copy(affect1)
     
     list_instable = []
     
