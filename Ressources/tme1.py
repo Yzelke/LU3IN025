@@ -191,8 +191,7 @@ def paire_instable(affect, prefEtu, prefSpe) :
                     etu_affect2 = [i for i in range(len(affect)) if affect[i] == s] #les etudiants préféré 
                     
                     for e in etu_affect2 : 
-                        if etu_pref.index(etu) < etu_pref.index(e) :
-                            print("ajoute")
+                        if etu_pref.index(etu) < etu_pref.index(e) and (s,etu) not in list_instable:
                             list_instable.append((s,etu))
             else : 
                 continue
