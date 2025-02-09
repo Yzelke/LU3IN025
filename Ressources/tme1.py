@@ -199,7 +199,7 @@ def paire_instable(affect1, prefEtu1, prefSpe1) :
                             list_instable.append((s,etu))
             else : 
                 continue
-                
+    print(list_instable)
     return list_instable
 
 #PARTIE 2
