@@ -48,7 +48,7 @@ print(time_moyP)
 l = [200,400,600,800,1000,1200,1400,1600,1800,2000]
 plt.title("Temps moyen en fonction du nombre d'étudiants")
 plt.plot(l, time_moyE, label="Moyenne de temps Étudiant")  
-plt.plot(l, time_moyP, label="Moyenne de temps Spécialité") 
+plt.plot(l, time_moyP, label="Moyenne de temps Parcours") 
 plt.xlabel("Nombre d'étudiants")
 plt.ylabel("Temps (en secondes)")
 plt.legend()
